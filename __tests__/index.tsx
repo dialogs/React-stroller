@@ -1,26 +1,33 @@
-import * as React from 'react';
-import {mount} from 'enzyme';
-import * as ReactDom from 'react-dom/server';
-import {Strollable, StrollableContainer} from '../src';
+import * as React from "react";
+import { render, fireEvent } from "@testing-library/react";
+import { Strollable, StrollableContainer } from "../src";
 
-describe('Specs', () => {
-  it('node Strollable', () => {
-    ReactDom.renderToString(<Strollable/>);
+describe("Strollable", () => {
+  it("should render correctly", () => {
+    const { container } = render(<Strollable />);
+
+    expect(container).toMatchSnapshot();
+  });
+});
+
+
+describe("StrollableContainer", () => {
+  it("should render correctly", () => {
+    const { container } = render(
+      <StrollableContainer>child</StrollableContainer>
+    );
+
+    expect(container).toMatchSnapshot();
   });
 
-  it('node StrollableContainer', () => {
-    ReactDom.renderToString(<StrollableContainer>child</StrollableContainer>);
-    //expect(document).toBe(undefined);
-  });
+  it("should handle scroll", () => {
+    const mockOnScroll = jest.fn();
+    const { container } = render(
+      <StrollableContainer onScroll={mockOnScroll}>child</StrollableContainer>
+    );
 
-  if(typeof document !== "undefined") {
-    it('node Strollable', () => {
-      mount(<Strollable/>);
-    });
-
-    it('node StrollableContainer', () => {
-      mount(<StrollableContainer>child</StrollableContainer>);
-      //expect(document).toBe(undefined);
-    });
-  }
+    fireEvent.scroll(container);
+    
+    expect(mockOnScroll).toHaveBeenCalledTimes(1);
+  })
 });

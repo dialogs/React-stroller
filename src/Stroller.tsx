@@ -1,5 +1,5 @@
 import * as React from 'react';
-import detectPassiveEvent from 'detect-passive-events';
+import {supportsPassiveEvents} from 'detect-passive-events';
 
 import {axisToProps, axisTypes, extractValues, findScrollableParent} from "./utils";
 import {BarLocation, BarSizeFunction, BarView, StollerBar, IStrollerBarProps, ISideBar} from "./Bar";
@@ -27,6 +27,8 @@ export interface IStrollerProps {
   scrollKey?: any;
 
   passive?: boolean;
+
+  onScroll?: (e: Event) => void;
 }
 
 export interface IComponentState {
@@ -36,8 +38,8 @@ export interface IComponentState {
   clientWidth: number;
   clientHeight: number;
 
-  targetWidth: number;
-  targetHeight: number;
+  targetWidth?: number;
+  targetHeight?: number;
 
   scrollLeft: number;
   scrollTop: number;
@@ -75,7 +77,7 @@ export class Stroller extends React.Component<IStrollerProps, IComponentState> {
   private scrollableParent: HTMLElement | undefined = undefined;
   private scrollContainer: HTMLElement | null = null;
   private barRef: HTMLElement | undefined = undefined;
-  private dettachParentCallback: null | (() => void);
+  private dettachParentCallback: null | (() => void) = null;
 
   componentDidMount() {
     this.scrollableParent = findScrollableParent(this.scrollContainer || this.topNode!, this.props.axis);
@@ -159,7 +161,7 @@ export class Stroller extends React.Component<IStrollerProps, IComponentState> {
     }
   }
 
-  private onContainerScroll = () => {
+  private onContainerScroll = (e?: Event) => {
     const topNode = this.scrollableParent as any;
 
     const scrollLeft = topNode.scrollLeft;
@@ -168,8 +170,8 @@ export class Stroller extends React.Component<IStrollerProps, IComponentState> {
     const scrollWidth = topNode.scrollWidth;
     const scrollHeight = topNode.scrollHeight;
 
-    const targetWidth = this.topNode.clientWidth;
-    const targetHeight = this.topNode.clientHeight;
+    const targetWidth = this.topNode?.clientWidth;
+    const targetHeight = this.topNode?.clientHeight;
 
     const clientWidth = topNode.clientWidth;
     const clientHeight = topNode.clientHeight;
@@ -179,7 +181,7 @@ export class Stroller extends React.Component<IStrollerProps, IComponentState> {
 
     const st: any = this.state;
 
-    const {axis = 'vertical', targetAxis} = this.props;
+    const {axis = 'vertical', onScroll } = this.props;
 
     const mainScroll = extractValues(st, axis);
 
@@ -198,12 +200,16 @@ export class Stroller extends React.Component<IStrollerProps, IComponentState> {
 
       hasScroll: mainScroll.scrollSpace > mainScroll.space,
     });
+
+    if (onScroll && e) {
+      onScroll(e);
+    }
   };
 
   private attach(parent: HTMLElement | Window) {
     this.dettach();
     const {passive} = this.props;
-    const options: any = passive && detectPassiveEvent.hasSupport ? {passive: true} : undefined;
+    const options: any = passive && supportsPassiveEvents ? {passive: true} : undefined;
     parent.addEventListener('scroll', this.onContainerScroll, options);
     this.dettachParentCallback = () => {
       parent.removeEventListener('scroll', this.onContainerScroll, options);
