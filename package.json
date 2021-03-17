@@ -1,5 +1,5 @@
 {
-  "name": "react-stroller",
+  "name": "@dlghq/react-stroller",
   "version": "1.7.3",
   "description": "React custom scrollbars, I mean strollbars",
   "scripts": {
@@ -37,7 +37,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/theKashey/react-stroller.git"
+    "url": "git+https://github.com/dialogs/react-stroller.git"
   },
   "author": "theKashey <thekashey@gmail.com>",
   "license": "MIT",
